@@ -28,6 +28,7 @@ export default function hook(WrappedComponent) {
     constructor(props, context) {
       super(props, context);
       this.generateTestHook = this.generateTestHook.bind(this);
+      this.generateTestHookTComb = this.generateTestHookTComb.bind(this);
     }
 
     // Public: Call `this.props.generateTestHook` in a ref within your
@@ -65,8 +66,24 @@ export default function hook(WrappedComponent) {
       }
     }
 
+    generateTestHookTComb(identifier, f = () => {}) {
+      return (component) => {
+        if (component && component.props.options && component.props.options.fields) {
+          Object.keys(component.props.options.fields).forEach(option => {
+            this.context.testHooks.add(`${identifier}.${option}`, component.getComponent(option).refs.input);
+          })
+        }
+
+        f(component);
+      }
+    }
+
     render() {
-      return <WrappedComponent generateTestHook={this.generateTestHook} {...this.props} />;
+      return <WrappedComponent
+        generateTestHook={this.generateTestHook}
+        generateTestHookTComb={this.generateTestHookTComb}
+        {...this.props}
+      />;
     }
   }
 
